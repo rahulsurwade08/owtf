@@ -10,12 +10,13 @@ data "aws_ami" "ubuntu" {
     name   = "virtualization-type"
     values = ["hvm"]
   }
+
   owners = ["099720109477"] # Canonical
 }
 
 resource "aws_instance" "ec2" {
-  ami = data.aws_ami.ubuntu.id
-  instance_type               = "t3.micro"
+  ami = data.aws_ami.ubuntu
+  instance_type               = "t2.micro"
   associate_public_ip_address = true
   key_name                    = aws_key_pair.keypair.key_name
   subnet_id                   = aws_subnet.subnet1.id
@@ -36,14 +37,16 @@ resource "aws_instance" "ec2" {
   provisioner "local-exec" {
     command = "mkdir ssh_file; echo '${tls_private_key.ssh_key.private_key_openssh}' > ssh_file/${var.keypair_name}.pem; chmod 400 ssh_file/${var.keypair_name}.pem"
   }
+}
 
+resource "null_resource" "deploy_owtf" {
   provisioner "local-exec" {
     command = <<EOT
     sleep 360;
     touch inventory.ini && echo "[all]" | tee -a inventory.ini;
     echo "${aws_instance.ec2.public_ip} ansible_user=${var.ansible_user} ansible_ssh_private_key_file=${var.ansible_ssh_file} ansible_python_interpreter=${var.ansible_python_interpreter}" | tee -a inventory.ini;
     export ANSIBLE_HOST_KEY_CHECKING=False; 
-    ansible-playbook -i inventory.ini playbook-kali.yml
+    ansible-playbook -i inventory.ini playbook-ubuntu.yaml
     EOT
   }
 }

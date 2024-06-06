@@ -1,5 +1,5 @@
 variable "ansible_user" {
-  default = "kali"
+  default = "ubuntu"
 }
 
 variable "ansible_ssh_file" {
