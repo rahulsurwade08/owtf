@@ -45,6 +45,10 @@ spec:
         volumeMounts:
         - name: owtf-volume
           mountPath: /owtf
+        resources:
+          limits:
+            cpu: "500m"  
+            memory: "500Mi"
       restartPolicy: Always
       volumes:
       - name: owtf-volume

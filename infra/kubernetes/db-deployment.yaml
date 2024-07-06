@@ -34,3 +34,7 @@ spec:
               key: db
         ports:
         - containerPort: 5432
+        resources:
+          limits:
+            cpu: "500m"  
+            memory: "500Mi"
