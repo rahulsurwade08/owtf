@@ -50,15 +50,14 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Clone OWTF repository
-RUN git clone https://github.com/owtf/owtf.git ${HOME}/owtf
-
-# Copy wait-for-it.sh script from the cloned repository
-RUN cp ${HOME}/owtf/docker/wait-for-it.sh /usr/bin/wait-for-it.sh && chmod +x /usr/bin/wait-for-it.sh
+# Create a dedicated OWTF directory to copy source to and run from.
+ADD . ${HOME}
+ADD docker/wait-for-it.sh /usr/bin/wait-for-it.sh
+RUN chmod +x /usr/bin/wait-for-it.sh
 
 USER owtf
 
-# Create and activate a python virtualenv
+#Create and activating a python virtualenv
 ENV VIRTUAL_ENV="${HOME}/owtf-venv"
 RUN python3.9 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -67,8 +66,8 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN pip install --upgrade pip
 RUN pip install setuptools==57.5.0 cffi wheel
 
-# Install python dependencies
-RUN pip install -r ${HOME}/owtf/requirements/base.txt
+#Installing python dependencies
+RUN pip install -r ${HOME}/requirements/base.txt
 
 # Stage 3: Tool Installation
 FROM owtf_setup AS final_install
@@ -78,11 +77,11 @@ RUN chown -R owtf:owtf ${HOME}
 USER owtf
 
 # Install OWTF using the recommended method (setup.py)
-RUN cd ${HOME}/owtf && \
-    python setup.py install
+RUN cd ${HOME} &&\
+python setup.py install
 
 # Set the current working directory to OWTF root directory
-WORKDIR ${HOME}/owtf
+WORKDIR ${HOME}
 
 # Expose the required ports for OWTF to run
 EXPOSE 8008 8009 8010
