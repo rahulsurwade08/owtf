@@ -3,7 +3,7 @@
 # Prompt for Docker Engine or Kaniko choice
 read -p "Do you want to use Docker for the build? (yes/y or no/n): " USE_DOCKER
 
-FILE_PATH=infra/kubernetes
+#FILE_PATH=infra/kubernetes
 
 # Convert input to lowercase to handle different cases
 USE_DOCKER=$(echo "$USE_DOCKER" | tr '[:upper:]' '[:lower:]')
@@ -12,7 +12,7 @@ apply_deployment() {
 
     # Apply manifests
     echo "Applying manifests..."
-    kubectl apply -f $FILE_PATH/.
+    kubectl apply -f .
 
     # Delete Docker Config JSON
     rm /home/$USER/.docker/config.json > /dev/null 2>&1
@@ -55,14 +55,14 @@ if [[ "$USE_DOCKER" == "no" || "$USE_DOCKER" == "n" ]]; then
     fi
 
     # Replace Image Names
-    sed -i "s/--destination=username\/image:tag/--destination=${USERNAME}\/${IMAGE_NAME}/" "$FILE_PATH/owtf-deployment.yaml"
-    sed -i "s/image: username\/image:tag/image: ${USERNAME}\/${IMAGE_NAME}/" "$FILE_PATH/owtf-deployment.yaml"
+    sed -i "s/--destination=username\/image:tag/--destination=${USERNAME}\/${IMAGE_NAME}/" "owtf-deployment.yaml"
+    sed -i "s/image: username\/image:tag/image: ${USERNAME}\/${IMAGE_NAME}/" "owtf-deployment.yaml"
 
     apply_deployment
 
     # Reverse the replacement
-    sed -i "s/--destination=${USERNAME}\/${IMAGE_NAME}/--destination=username\/image:tag/" "$FILE_PATH/owtf-deployment.yaml"
-    sed -i "s/image: ${USERNAME}\/${IMAGE_NAME}/image: username\/image:tag/" "$FILE_PATH/owtf-deployment.yaml"
+    sed -i "s/--destination=${USERNAME}\/${IMAGE_NAME}/--destination=username\/image:tag/" "owtf-deployment.yaml"
+    sed -i "s/image: ${USERNAME}\/${IMAGE_NAME}/image: username\/image:tag/" "owtf-deployment.yaml"
 
 fi
 
@@ -88,7 +88,7 @@ if [[ "$USE_DOCKER" == "yes" || "$USE_DOCKER" == "y" ]]; then
 
     # Build the Docker image
     echo "Building Docker image..."
-    docker build -t "$USERNAME/$IMAGE_NAME" -f $FILE_PATH/Dockerfile $FILE_PATH
+    docker build -t "$USERNAME/$IMAGE_NAME" -f Dockerfile .
 
     # Check if build was successful
     if [ $? -ne 0 ]; then
@@ -113,17 +113,17 @@ if [[ "$USE_DOCKER" == "yes" || "$USE_DOCKER" == "y" ]]; then
     sed -i \
         -e '/^spec:/,/^      containers:/ { s/^#.*//; s/^      initContainers:/#      initContainers:/; s/^      - name: kaniko/#      - name: kaniko/; s/^        image: gcr.io\/kaniko-project\/executor:latest/#        image: gcr.io\/kaniko-project\/executor:latest/; s/^        env:/#        env:/; s/^          - name: DOCKER_CONFIG/#          - name: DOCKER_CONFIG/; s/^            value: \/root\/.docker\//#            value: \/root\/.docker\//; s/^        args:/#        args:/; s/^          - "--dockerfile=\/infra\/kubernetes\/Dockerfile"/#          - "--dockerfile=\/infra\/kubernetes\/Dockerfile"/; s/^          - "--context=git:\/\/github.com\/owtf\/owtf#develop"/#          - "--context=git:\/\/github.com\/owtf\/owtf#develop"/; s/^          - "--destination=username\/image:tag"/#          - "--destination=username\/image:tag"/; s/^          - "--compressed-caching=false"/#          - "--compressed-caching=false"/; s/^          - "--ignore-path=\/product_uuid"/#          - "--ignore-path=\/product_uuid"/; s/^        volumeMounts:/#        volumeMounts:/; s/^          - name: kaniko-secret/#          - name: kaniko-secret/; s/^            mountPath: \/root/#            mountPath: \/root/; }' \
         -e '/^      volumes:/,/^      containers:/ { s/^#.*//; s/^      - name: kaniko-secret/#      - name: kaniko-secret/; s/^        secret:/#        secret:/; s/^          secretName: regcred /#          secretName: regcred /; s/^          items:/#          items:/; s/^            - key: .dockerconfigjson/#            - key: .dockerconfigjson/; s/^              path: .docker\/config.json/#              path: .docker\/config.json/; }' \
-        $FILE_PATH/owtf-deployment.yaml
+        owtf-deployment.yaml
     
     # Replace Image Names
-    sed -i "s/image: username\/image:tag/image: ${USERNAME}\/${IMAGE_NAME}/" "$FILE_PATH/owtf-deployment.yaml"
+    sed -i "s/image: username\/image:tag/image: ${USERNAME}\/${IMAGE_NAME}/" "owtf-deployment.yaml"
 
     apply_deployment
     
     # Reverse the replacement
-    sed -i "s/image: ${USERNAME}\/${IMAGE_NAME}/image: username\/image:tag/" "$FILE_PATH/owtf-deployment.yaml"
+    sed -i "s/image: ${USERNAME}\/${IMAGE_NAME}/image: username\/image:tag/" "owtf-deployment.yaml"
     
     #Restore the owtf deployment manifest
-    sed -i 's/^#\(.*\)$/\1/' $FILE_PATH/owtf-deployment.yaml
+    sed -i 's/^#\(.*\)$/\1/' owtf-deployment.yaml
 
 fi
