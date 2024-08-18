@@ -1,9 +1,6 @@
----
 - name: Setup Ubuntu with Docker and OWASP OWTF
-  hosts: localhost
+  hosts: all
   become: true
-  connection: local
-
   tasks:
     - name: Update apt repository and upgrade packages
       apt:
@@ -33,26 +30,18 @@
         apt-cache policy docker-ce && sudo apt install docker-ce -y
 
     - name: Add user to docker group
-      become: yes
       user:
-        name: "{{ ansible_user }}"
+        name: ubuntu
         groups: docker
         append: yes
-
-    - name: Notify user of need to log out and log back in
-      ansible.builtin.debug:
-        msg: "NOTE: You'll need to log out and log back in for the group membership to take effect."
-
-    - name: Reset ssh connection to allow user changes to take effect
-      meta: reset_connection
-
-    - name: Clone OWTF repository
-      ansible.builtin.shell: |
-        git clone https://github.com/owtf/owtf /home/ubuntu/owtf
 
     - name: Restart Docker service
       ansible.builtin.shell: |
         sudo systemctl restart docker
+
+    - name: Clone OWTF repository
+      ansible.builtin.shell: |
+        git clone https://github.com/owtf/owtf /home/ubuntu/owtf
 
     - name: Run OWTF using Docker Compose
       ansible.builtin.shell: |
