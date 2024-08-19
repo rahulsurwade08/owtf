@@ -35,13 +35,6 @@
         groups: docker
         append: yes
 
-    - name: Notify user of need to log out and back in
-      ansible.builtin.debug:
-        msg: "NOTE: You'll need to log out and log back in for the group membership to take effect."
-
-    - name: Reset ssh connection to allow user changes to take affect 
-      meta: reset_connection
-
     - name: Restart Docker service
       ansible.builtin.shell: |
         sudo systemctl restart docker
