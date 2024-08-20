@@ -4,61 +4,70 @@
   become: true
   tasks:
 
-#    - name: Update apt repository and upgrade packages
-#      ansible.builtin.apt:
-#        update_cache: yes
-#        upgrade: dist
-#        autoremove: yes
+    - name: Set up logging environment variables
+      ansible.builtin.shell: |
+        echo 'ANSIBLE_STDOUT_CALLBACK=yaml' >> ~/.bashrc
+        echo 'ANSIBLE_LOG_PATH=~/ansible-playbook.log' >> ~/.bashrc
+        source ~/.bashrc
+      args:
+        warn: false
+      become: false
 
-#    - name: Install prerequisite packages
-#      ansible.builtin.apt:
-#        name: 
-#          - apt-transport-https
-#          - ca-certificates
-#          - curl
-#          - software-properties-common
-#          - git
-#          - docker-compose
-#          - make
-#        state: present
+    - name: Update apt repository and upgrade packages
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+        autoremove: yes
 
-#    - name: Add Docker's official GPG key
-#      ansible.builtin.shell: |
-#        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-#      args:
-#        warn: false
+    - name: Install prerequisite packages
+      ansible.builtin.apt:
+        name: 
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - git
+          - docker-compose
+          - make
+        state: present
 
-#    - name: Add Docker's stable repository
-#      ansible.builtin.shell: |
-#        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-#      args:
-#        warn: false
+    - name: Add Docker's official GPG key
+      ansible.builtin.shell: |
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+      args:
+        warn: false
 
-#    - name: Update apt package index (again)
-#      ansible.builtin.apt:
-#        update_cache: yes
+    - name: Add Docker's stable repository
+      ansible.builtin.shell: |
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      args:
+        warn: false
 
-#    - name: Install Docker CE
-#      ansible.builtin.shell: |
-#        sudo apt-cache policy docker-ce && sudo apt install docker-ce -y
-#      args:
-#        warn: false
+    - name: Update apt package index (again)
+      ansible.builtin.apt:
+        update_cache: yes
 
-#    - name: Add ubuntu user to docker group
-#      ansible.builtin.user:
-#        name: ubuntu
-#        groups: docker
-#        append: yes
+    - name: Install Docker CE
+      ansible.builtin.shell: |
+        sudo apt-cache policy docker-ce && sudo apt install docker-ce -y
+      args:
+        warn: false
 
-#    - name: Add ssm-user to docker group
-#      ansible.builtin.user:
-#        name: ssm-user
-#        groups: docker
-#        append: yes
+    - name: Add $USER to docker group
+      ansible.builtin.user:
+        name: "{{ lookup('env', 'USER') }}"
+        groups: docker
+        append: yes
 
-#    - name: Notify user of need to log out and back in
-#      ansible.builtin.debug:
-#        msg: "NOTE: You'll need to log out and log back in for the group membership to take effect."
+    - name: Add ssm-user to docker group
+      ansible.builtin.user:
+        name: ssm-user
+        groups: docker
+        append: yes
+
+    - name: Notify user of need to log out and back in
+      ansible.builtin.debug:
+        msg: "NOTE: You'll need to log out and log back in for the group membership to take effect."
 
     - name: Start Docker service
       ansible.builtin.systemd:
@@ -68,10 +77,14 @@
     - name: Clone OWTF repository
       ansible.builtin.git:
         repo: https://github.com/owtf/owtf.git
-        dest: /home/ubuntu/owtf
+        dest: "/home/{{ lookup('env', 'USER') }}/owtf"
 
     - name: Run OWTF using Docker Compose
       ansible.builtin.shell: |
-        cd /home/ubuntu/owtf && make compose-safe
+        cd /home/{{ lookup('env', 'USER') }}/owtf && docker-compose -f docker/docker-compose.dev.yml up --build -d
       args:
-        chdir: /home/ubuntu/owtf
+        chdir: "/home/{{ lookup('env', 'USER') }}/owtf"
+
+    - name: Notify where logs can be found
+      ansible.builtin.debug:
+        msg: "Logs for this playbook execution can be found at ~/ansible-playbook.log."
