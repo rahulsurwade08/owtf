@@ -41,10 +41,10 @@
         groups: docker
         append: yes
 
-    - name: Restart Docker service
+    - name: Start Docker service
       ansible.builtin.service:
         name: docker
-        state: restarted
+        state: started
 
     - name: Clone OWTF repository
       ansible.builtin.shell: |
