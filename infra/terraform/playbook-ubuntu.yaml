@@ -49,9 +49,8 @@
       meta: reset_connection
 
     - name: Start Docker service
-      ansible.builtin.service:
-        name: docker
-        state: started
+      ansible.builtin.shell: |
+        sudo systemctl start docker
 
     - name: Clone OWTF repository
       ansible.builtin.shell: |
