@@ -2,6 +2,12 @@
   hosts: all
   become: true
   tasks:
+    - name: Print current user
+      command: whoami
+
+    - name: Print current shell
+      command: echo $SHELL
+
     - name: Update apt repository and upgrade packages
       apt:
         update_cache: yes
@@ -27,7 +33,7 @@
 
     - name: Install Docker CE
       ansible.builtin.shell: |
-        apt-cache policy docker-ce && sudo apt install docker-ce -y
+        sudo apt-cache policy docker-ce && sudo apt install docker-ce -y
 
     - name: Add user to docker group
       user:
@@ -35,9 +41,10 @@
         groups: docker
         append: yes
 
-    - name: Restart Docker service
-      ansible.builtin.shell: |
-        sudo systemctl restart docker
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
 
     - name: Clone OWTF repository
       ansible.builtin.shell: |
@@ -46,4 +53,3 @@
     - name: Run OWTF using Docker Compose
       ansible.builtin.shell: |
         docker-compose -f /home/ubuntu/owtf/docker/docker-compose.dev.yml up -d
-...
