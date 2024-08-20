@@ -4,11 +4,17 @@
   become: true
   tasks:
 
+    - name: Ensure home directory and .bashrc file exist
+      ansible.builtin.file:
+        path: "{{ lookup('env', 'HOME') }}/.bashrc"
+        state: touch
+
     - name: Set up logging environment variables
       ansible.builtin.shell: |
         echo 'ANSIBLE_STDOUT_CALLBACK=yaml' >> ~/.bashrc
         echo 'ANSIBLE_LOG_PATH=~/ansible-playbook.log' >> ~/.bashrc
-        source ~/.bashrc
+        bash -c "source ~/.bashrc"
+      shell: /bin/bash
       become: false
 
     - name: Update apt repository and upgrade packages
