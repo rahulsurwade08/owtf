@@ -2,12 +2,6 @@
   hosts: all
   become: true
   tasks:
-    - name: Print current user
-      command: whoami
-
-    - name: Print current shell
-      command: echo $SHELL
-
     - name: Update apt repository and upgrade packages
       apt:
         update_cache: yes
@@ -37,7 +31,13 @@
 
     - name: Add user to docker group
       user:
-        name: $USER
+        name: ubuntu
+        groups: docker
+        append: yes
+        
+    - name: Add user to docker group
+      user:
+        name: ssm-user
         groups: docker
         append: yes
 
@@ -49,8 +49,7 @@
       meta: reset_connection
 
     - name: Start Docker service
-      ansible.builtin.shell: |
-        sudo systemctl start docker
+      command: sudo systemctl start docker
 
     - name: Clone OWTF repository
       ansible.builtin.shell: |
