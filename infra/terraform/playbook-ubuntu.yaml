@@ -37,19 +37,19 @@
 
     - name: Add user to docker group
       user:
-        name: ubuntu
+        name: $USER
         groups: docker
         append: yes
 
-    - name: Ensure Docker service is running
-      service:
+    - name: Restart Docker service
+      ansible.builtin.service:
         name: docker
-        state: started
+        state: restarted
 
     - name: Clone OWTF repository
       ansible.builtin.shell: |
-        git clone https://github.com/owtf/owtf /home/ubuntu/owtf
+        git clone https://github.com/owtf/owtf.git
 
     - name: Run OWTF using Docker Compose
       ansible.builtin.shell: |
-        docker-compose -f /home/ubuntu/owtf/docker/docker-compose.dev.yml up -d
+        cd owtf && make compose-safe
