@@ -59,12 +59,6 @@
         groups: docker
         append: yes
 
-    - name: Add ssm-user to docker group
-      ansible.builtin.user:
-        name: ssm-user
-        groups: docker
-        append: yes
-
     - name: Notify user of need to log out and back in
       ansible.builtin.debug:
         msg: "NOTE: You'll need to log out and log back in for the group membership to take effect."
