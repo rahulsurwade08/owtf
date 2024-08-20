@@ -7,7 +7,7 @@
     - name: Set up logging environment variables
       ansible.builtin.set_fact:
         ANSIBLE_STDOUT_CALLBACK: yaml
-        ANSIBLE_LOG_PATH: ~/ansible-playbook.log
+        ANSIBLE_LOG_PATH: /etc/ansible-playbook.log
       become: false
 
     - name: Update apt repository and upgrade packages
@@ -46,7 +46,7 @@
 
     - name: Add $USER to docker group
       ansible.builtin.user:
-        name: "{{ lookup('env', 'USER') }}"
+        name: ssm-user
         groups: docker
         append: yes
 
@@ -62,12 +62,12 @@
     - name: Clone OWTF repository
       ansible.builtin.git:
         repo: https://github.com/owtf/owtf.git
-        dest: "/home/{{ lookup('env', 'USER') }}/owtf"
+        dest: "/home/ssm-user/owtf"
 
     - name: Run OWTF using Docker Compose
       ansible.builtin.shell: |
-        cd /home/{{ lookup('env', 'USER') }}/owtf && docker-compose -f docker/docker-compose.dev.yml up --build -d
+        cd /home/ssm-user/owtf && docker-compose -f docker/docker-compose.dev.yml up --build -d
 
     - name: Notify where logs can be found
       ansible.builtin.debug:
-        msg: "Logs for this playbook execution can be found at ~/ansible-playbook.log."
+        msg: "Logs for this playbook execution can be found at /etc/ansible-playbook.log."
