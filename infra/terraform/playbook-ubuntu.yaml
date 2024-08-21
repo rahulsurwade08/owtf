@@ -4,15 +4,9 @@
   become: true
   tasks:
 
-    - name: Get the value of $USER
-      shell:
-        cmd: echo $USER
-      register: user_env_var
-      changed_when: false
-
     - debug:
-        var: user_env_var.stdout
-            
+      msg: "Ansible user is {{ ansible_user }}"
+
     - name: Set up logging environment variables
       ansible.builtin.set_fact:
         ANSIBLE_STDOUT_CALLBACK: yaml
