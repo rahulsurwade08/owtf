@@ -4,6 +4,14 @@
   become: true  # Keep 'become: true' for privilege escalation when needed
   become_user: ssm-user
   tasks:
+    - name: Ensure ssm-user owns their home directory
+      file:
+        path: /home/ssm-user
+        owner: ssm-user
+        group: ssm-user
+        state: directory
+        recurse: yes
+
     - name: Set up logging environment variables
       ansible.builtin.set_fact:
         ANSIBLE_STDOUT_CALLBACK: yaml
