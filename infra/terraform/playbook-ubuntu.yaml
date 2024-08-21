@@ -59,42 +59,22 @@
         - ssm-user
         - ubuntu
 
-    - name: Re-evaluate group memberships for ssm-user
-      become_user: ssm-user 
-      ansible.builtin.shell:
-        cmd: newgrp docker
-      become: false 
-
-    - name: Re-evaluate group memberships for ubuntu user
-      become_user: ubuntu 
-      ansible.builtin.shell:
-        cmd: newgrp docker
-      become: false 
-
     - name: Notify user of need to log out and back in
       ansible.builtin.debug:
         msg: "NOTE: You'll need to log out and log back in for the group membership to take effect."
-
-    - name: Check Docker version (for debugging)
-      ansible.builtin.shell:
-        cmd: docker --version
-      register: docker_version_output
-      failed_when: docker_version_output.rc != 0
-
-    - name: Display Docker version
-      ansible.builtin.debug:
-        var: docker_version_output.stdout
 
     - name: Start Docker service
       ansible.builtin.systemd:
         name: docker
         state: started
         enabled: yes
+      become: true  # Ensures this runs with root privileges
 
     - name: Check Docker service status (for debugging)
       ansible.builtin.shell:
         cmd: systemctl status docker
       register: docker_status_output
+      become: true  # Ensures this runs with root privileges
 
     - name: Display Docker service status
       ansible.builtin.debug:
@@ -108,6 +88,7 @@
     - name: Run OWTF using Docker Compose
       ansible.builtin.shell: |
         cd /home/ssm-user/owtf && docker-compose -f docker/docker-compose.dev.yml up --build -d
+      become: true  # Ensure Docker Compose commands run with necessary permissions
 
     - name: Notify where logs can be found
       ansible.builtin.debug:
