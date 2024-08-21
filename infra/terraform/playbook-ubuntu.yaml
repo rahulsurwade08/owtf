@@ -4,6 +4,15 @@
   become: true
   tasks:
 
+    - name: Get the value of $USER
+      shell:
+        cmd: echo $USER
+      register: user_env_var
+      changed_when: false
+
+    - debug:
+        var: user_env_var.stdout
+            
     - name: Set up logging environment variables
       ansible.builtin.set_fact:
         ANSIBLE_STDOUT_CALLBACK: yaml
@@ -50,6 +59,12 @@
         groups: docker
         append: yes
 
+    - name: Add $USER to docker group
+      ansible.builtin.user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
     - name: Notify user of need to log out and back in
       ansible.builtin.debug:
         msg: "NOTE: You'll need to log out and log back in for the group membership to take effect."
@@ -62,11 +77,11 @@
     - name: Clone OWTF repository
       ansible.builtin.git:
         repo: https://github.com/owtf/owtf.git
-        dest: "/home/ssm-user/owtf"
+        dest: "/home/ubuntu/owtf"
 
     - name: Run OWTF using Docker Compose
       ansible.builtin.shell: |
-        cd /home/ssm-user/owtf && docker-compose -f docker/docker-compose.dev.yml up --build -d
+        cd /home/ubuntu/owtf && docker-compose -f docker/docker-compose.dev.yml up --build -d
 
     - name: Notify where logs can be found
       ansible.builtin.debug:
