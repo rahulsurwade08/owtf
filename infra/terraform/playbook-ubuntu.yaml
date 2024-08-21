@@ -2,6 +2,7 @@
 - name: Setup Ubuntu with Docker and OWASP OWTF
   hosts: localhost
   become: true
+  become_user: ssm-user
   tasks:
     - name: Set up logging environment variables
       ansible.builtin.set_fact:
@@ -67,11 +68,11 @@
     - name: Clone OWTF repository
       ansible.builtin.git:
         repo: https://github.com/owtf/owtf.git
-        dest: "/home/ubuntu/owtf"
+        dest: "/home/ssm-user/owtf"
 
     - name: Run OWTF using Docker Compose
       ansible.builtin.shell: |
-        cd /home/ubuntu/owtf && docker-compose -f docker/docker-compose.dev.yml up --build -d
+        cd /home/ssm-user/owtf && docker-compose -f docker/docker-compose.dev.yml up --build -d
 
     - name: Notify where logs can be found
       ansible.builtin.debug:
