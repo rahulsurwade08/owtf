@@ -1,17 +1,9 @@
 ---
 - name: Setup Ubuntu with Docker and OWASP OWTF
   hosts: localhost
-  become: true  # Keep 'become: true' for privilege escalation when needed
-  become_user: ssm-user
+  become: true
+  become_user: root
   tasks:
-    - name: Ensure ssm-user owns their home directory
-      file:
-        path: /home/ssm-user
-        owner: ssm-user
-        group: ssm-user
-        state: directory
-        recurse: yes
-
     - name: Set up logging environment variables
       ansible.builtin.set_fact:
         ANSIBLE_STDOUT_CALLBACK: yaml
@@ -38,11 +30,11 @@
 
     - name: Add Docker's official GPG key
       ansible.builtin.shell: |
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
     - name: Add Docker's stable repository
       ansible.builtin.shell: |
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
     - name: Update apt package index (again)
       ansible.builtin.apt:
@@ -54,7 +46,7 @@
         state: present
 
     - name: Ensure Docker group exists
-      group:
+      ansible.builtin.group:
         name: docker
         state: present
 
@@ -63,19 +55,19 @@
         name: "{{ item }}"
         groups: docker
         append: yes
-      with_items:
+      loop:
         - ssm-user
         - ubuntu
 
     - name: Re-evaluate group memberships for ssm-user
       become_user: ssm-user 
-      shell:
+      ansible.builtin.shell:
         cmd: newgrp docker
       become: false 
 
     - name: Re-evaluate group memberships for ubuntu user
       become_user: ubuntu 
-      shell:
+      ansible.builtin.shell:
         cmd: newgrp docker
       become: false 
 
@@ -84,12 +76,13 @@
         msg: "NOTE: You'll need to log out and log back in for the group membership to take effect."
 
     - name: Check Docker version (for debugging)
-      shell:
+      ansible.builtin.shell:
         cmd: docker --version
       register: docker_version_output
       failed_when: docker_version_output.rc != 0
 
-    - debug:
+    - name: Display Docker version
+      ansible.builtin.debug:
         var: docker_version_output.stdout
 
     - name: Start Docker service
@@ -99,11 +92,12 @@
         enabled: yes
 
     - name: Check Docker service status (for debugging)
-      shell:
+      ansible.builtin.shell:
         cmd: systemctl status docker
       register: docker_status_output
 
-    - debug:
+    - name: Display Docker service status
+      ansible.builtin.debug:
         var: docker_status_output.stdout
 
     - name: Clone OWTF repository
