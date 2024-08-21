@@ -70,16 +70,6 @@
         enabled: yes
       become: true  # Ensures this runs with root privileges
 
-    - name: Check Docker service status (for debugging)
-      ansible.builtin.shell:
-        cmd: systemctl status docker
-      register: docker_status_output
-      become: true  # Ensures this runs with root privileges
-
-    - name: Display Docker service status
-      ansible.builtin.debug:
-        var: docker_status_output.stdout
-
     - name: Clone OWTF repository
       ansible.builtin.git:
         repo: https://github.com/owtf/owtf.git
