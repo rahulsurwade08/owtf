@@ -18,7 +18,7 @@
 
     - name: Install prerequisite packages
       ansible.builtin.apt:
-        name: 
+        name:
           - apt-transport-https
           - ca-certificates
           - curl
@@ -64,21 +64,26 @@
         msg: "NOTE: You'll need to log out and log back in for the group membership to take effect."
 
     - name: Start Docker service
-      ansible.builtin.systemd:
-        name: docker
-        state: started
-        enabled: yes
-      become: true  # Ensures this runs with root privileges
+      ansible.builtin.shell: |
+        systemctl start docker
+      args:
+        executable: /bin/bash
+
+    - name: Restart Docker service
+      ansible.builtin.shell: |
+        systemctl restart docker
+      args:
+        executable: /bin/bash
 
     - name: Clone OWTF repository
       ansible.builtin.git:
         repo: https://github.com/owtf/owtf.git
         dest: "/home/ssm-user/owtf"
 
-    - name: Run OWTF using Docker Compose
+    - name: Run OWTF using Docker Compose as ssm-user
       ansible.builtin.shell: |
-        cd /home/ssm-user/owtf && docker-compose -f docker/docker-compose.dev.yml up --build -d
-      become: true  # Ensure Docker Compose commands run with necessary permissions
+        sudo -u ssm-user bash -c 'cd /home/ssm-user/owtf && docker-compose -f docker/docker-compose.dev.yml up --build -d'
+      become: false
 
     - name: Notify where logs can be found
       ansible.builtin.debug:
