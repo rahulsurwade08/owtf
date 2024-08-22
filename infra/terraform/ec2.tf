@@ -71,15 +71,21 @@ resource "aws_instance" "ec2" {
 
   user_data  = <<-EOF
               #!/bin/bash
-              sudo apt update -y
+              LOGFILE=/var/log/nat_instance_setup.log
+              exec > >(tee -a $LOGFILE) 2>&1
+              sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y
               sudo snap install amazon-ssm-agent --classic
               sudo snap start amazon-ssm-agent
-              sudo apt install awscli -y
-              sudo apt install software-properties-common -y
-              sudo add-apt-repository --yes --update ppa:ansible/ansible
-              sudo apt install ansible -y
+              sudo apt install awscli software-properties-common apt-transport-https ca-certificates curl git docker-compose make -y
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+              sudo apt-cache policy docker-ce && sudo apt install docker-ce -y
+              sudo usermod -aG docker ssm-user
+              sudo systemctl restart docker
+              git clone https://github.com/owtf/owtf.git
+              cd owtf && docker-compose -f docker/docker-compose.dev.yml up --build -d
               EOF
-  depends_on = [aws_lb.alb, aws_vpc.vpc, aws_instance.nat_instance, null_resource.wait_for_nat]
+  depends_on = [aws_lb.alb, aws_vpc.vpc]
 }
 
 resource "null_resource" "wait_for_ec2" {

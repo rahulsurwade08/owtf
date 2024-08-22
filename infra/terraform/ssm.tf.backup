@@ -1,6 +1,6 @@
 resource "aws_ssm_association" "ansible_playbook" {
   name = "AWS-RunAnsiblePlaybook"
-
+  association_name  = "OWTF_AnsiblePlaybook"
   targets {
     key    = "InstanceIds"
     values = [aws_instance.ec2.id]

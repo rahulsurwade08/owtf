@@ -35,7 +35,7 @@ variable "amazon_account" {
 }
 
 variable "instance_type" {
-  default = "t2.micro"
+  default = "t2.medium"
 }
 
 variable "volume_size" {
@@ -68,16 +68,4 @@ variable "public_subnet2_cidr" {
 
 variable "private_subnet_cidr" {
   default = "10.1.3.0/24"
-}
-
-variable "playbookurl" {
-  default = "https://raw.githubusercontent.com/owtf/owtf/develop/infra/terraform/playbook-ubuntu.yaml"
-}
-
-variable "timeoutseconds" {
-  default = 3600
-}
-
-variable "check" {
-  default = "False"
 }
