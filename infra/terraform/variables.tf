@@ -3,7 +3,7 @@ variable "region" {
 }
 
 variable "owtf_ui_port" {
-  default = "8009"
+  default = "8019"
 }
 
 variable "owtf_admin_port" {
