@@ -144,7 +144,7 @@ This script automates the process of modifying a Terraform configuration file, c
 
     Run this command to initiate, format, validate, and plan Terraform scripts.
 
-7. **Destroy Infrastructure**
+7. **Apply Infrastructure**
 
     ```
     terraform apply --auto-approve
