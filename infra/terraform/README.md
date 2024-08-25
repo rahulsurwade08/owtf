@@ -21,20 +21,15 @@ This script automates the process of modifying a Terraform configuration file, c
 
     Make sure to install [Terraform](https://developer.hashicorp.com/terraform/install) and [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
-4. **Configure AWS CLI**
+4. **Configure AWS Credentials**
 
     ```
-    aws configure
+    Export access_key=<Paste you access key here>
+    
+    Export secret_key=<Paste your secret key here>  
     ```
-    Run this command to configure aws access key and secret access key of your aws iam user.
+   Run these command to configure aws access key and secret access key of your aws iam user to be used by terraform.
 
-    ```
-    AWS Access Key ID [None]: 
-    AWS Secret Access Key [None]: 
-    Default region name [None]: 
-    Default output format [None]: 
-    ```
-    It would prompt you to paste these details.
 5. **Define Variables**
 
    ```bash
@@ -48,10 +43,17 @@ This script automates the process of modifying a Terraform configuration file, c
     bash apply-script.sh
     ```
 
-    Run this command which initiate, format, validate, plan and apply terraform scripts. 
+    Run this command which initiate, format, validate, plan terraform scripts. 
 
-7. **Logs Location**    
-    You can connect to the machine using session manager to check the logs as well at this location using this command
+7. **Destroy Infrastructure**
+
+    ```
+    terraform apply --auto-approve
+    ```
+    Run this command to apply the terraform scripts to create infrastructure on AWS account.
+
+8. **Logs Location**    
+    You can connect to the machine using **Session Manager** to check the logs as well at this location using this command
 
     ```
     tail -f /var/log/nat_instance_setup.log
@@ -66,7 +68,7 @@ This script automates the process of modifying a Terraform configuration file, c
     ```
     docker logs <Container_ID/Container_Name>
     ```
-7. **Destroy Infrastructure**
+9. **Destroy Infrastructure**
 
     ```
     terraform destroy --auto-approve
@@ -74,7 +76,7 @@ This script automates the process of modifying a Terraform configuration file, c
     Run this command if you want to destroy the created infrastructure on AWS account.
 ### Creating and Adding SSL Certificates to an Application Load Balancer (ALB)
 
-> Note: If you want to use HTTPS for your application, follow below steps. Else these steps can we skipped.
+> Note: If you want to use HTTPS for your application, follow below steps. else these steps can be skipped.
 ### Creating an SSL Certificate
 
 #### Using AWS Certificate Manager (ACM)

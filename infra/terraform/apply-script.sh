@@ -75,15 +75,15 @@ case "$user_input" in
         ;;
 esac
 
-# Initialize Terraform
-echo "Initializing Terraform..."
-terraform init
-check_success "terraform init"
-
 # Format Terraform files
 echo "Formatting Terraform files..."
 terraform fmt
 check_success "terraform fmt"
+
+# Initialize Terraform
+echo "Initializing Terraform..."
+terraform init
+check_success "terraform init"
 
 # Validate Terraform files
 echo "Validating Terraform configuration..."
@@ -94,10 +94,3 @@ check_success "terraform validate"
 echo "Planning Terraform changes..."
 terraform plan
 check_success "terraform plan"
-
-# Apply Terraform changes
-echo "Applying Terraform changes..."
-terraform apply --auto-approve
-check_success "terraform apply"
-
-echo "All operations completed successfully."
