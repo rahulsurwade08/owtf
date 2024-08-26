@@ -148,7 +148,7 @@ This script automates the process of modifying a Terraform configuration file, c
     tail -f /var/log/setup.log
     ```
     
-    **Please wait for at least 15 minutes for Terraform to apply scripts and 30 minutes more for Docker containers to build and run.**
+    **Please wait for the logs to show that OWTF has started**
 
     > Note: If you have not configured SMTP for your OWTF application, use the logs of the OWTF Docker container to get the verification link during login. Make sure to replace the appropriate IP address in that link with the **ALB DNS Name**. 
     
