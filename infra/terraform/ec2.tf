@@ -70,7 +70,7 @@ resource "aws_instance" "ec2" {
 
   user_data  = <<-EOF
               #!/bin/bash
-              LOGFILE=/var/log/nat_instance_setup.log
+              LOGFILE=/var/log/setup.log
               exec > >(tee -a $LOGFILE) 2>&1
               sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y
               sudo snap install amazon-ssm-agent --classic

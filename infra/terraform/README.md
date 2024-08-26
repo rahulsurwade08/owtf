@@ -1,11 +1,3 @@
-Certainly! Here’s the updated `README.md` with the new section added for setting up AWS roles and permissions:
-
----
-
-# OWTF Terraform Scripts
-
-## Overview of the Bash Script
-
 This script automates the process of modifying a Terraform configuration file, checking for unsafe modifications, and running Terraform commands. It also handles different operating systems (macOS and Linux) and allows the user to choose whether to run the script in a "safe mode" or "unsafe mode."
 
 ## Deployment Steps
@@ -38,7 +30,7 @@ This script automates the process of modifying a Terraform configuration file, c
    2. **Create IAM Roles for SSO:**
       - Go to the [IAM Console](https://console.aws.amazon.com/iam/home).
       - Create a new role and select **AWS SSO** as the trusted entity.
-      - Assign permissions that are necessary for Terraform operations. Common permissions include `AmazonEC2FullAccess`, `AmazonVPCFullAccess`, `AmazonS3FullAccess`, and `IAMFullAccess`.
+      - Assign permissions that are necessary for Terraform operations `AmazonEC2FullAccess`, `AmazonVPCFullAccess`, `ElasticLoadBalancingFullAccess`, and `IAMFullAccess`.
 
    3. **Assign Roles to Users:**
       - Go back to the AWS SSO Console.
@@ -65,7 +57,7 @@ This script automates the process of modifying a Terraform configuration file, c
 
    1. **Create a Role with Necessary Permissions:**
       - Go to the [IAM Console](https://console.aws.amazon.com/iam/home).
-      - Create a new IAM role with the permissions required for Terraform operations `AmazonEC2FullAccess`, `AmazonS3FullAccess`, `IAMFullAccess`, `AmazonVPCFullAccess`.
+      - Assign permissions that are necessary for Terraform operations `AmazonEC2FullAccess`, `AmazonVPCFullAccess`, `ElasticLoadBalancingFullAccess`, and `IAMFullAccess`.
 
    2. **Create a Trust Policy for the Role:**
       - Add a trust policy to allow specific IAM users or roles to assume this role. Example trust policy:
@@ -77,7 +69,7 @@ This script automates the process of modifying a Terraform configuration file, c
             "Effect": "Allow",
             "Principal": {
                "AWS": [
-                  "arn:aws:iam::123456789012:user/terraform-user"
+                  "arn:aws:iam::<aws_account_id>:user/terraform-user"
                ]
             },
             "Action": "sts:AssumeRole"
@@ -87,9 +79,7 @@ This script automates the process of modifying a Terraform configuration file, c
       ```
 
    3. **Create IAM Users with Limited Permissions:**
-      - Create IAM users who will
-
-   use Terraform.
+      - Create IAM users who will use Terraform.
       - Grant these users only the permission to assume the previously created role. Example policy for the user:
       ```json
       {
@@ -98,7 +88,7 @@ This script automates the process of modifying a Terraform configuration file, c
             {
             "Effect": "Allow",
             "Action": "sts:AssumeRole",
-            "Resource": "arn:aws:iam::123456789012:role/terraform-role"
+            "Resource": "arn:aws:iam::<aws_account_id>:role/terraform-role"
             }
          ]
       }
@@ -147,7 +137,7 @@ This script automates the process of modifying a Terraform configuration file, c
 7. **Apply Infrastructure**
 
     ```
-    terraform apply --auto-approve
+    terraform apply
     ```
     Run this command to apply the Terraform scripts to create infrastructure on your AWS account.
 
@@ -155,7 +145,7 @@ This script automates the process of modifying a Terraform configuration file, c
     You can connect to the machine using **Session Manager** to check the logs at this location using this command:
 
     ```
-    tail -f /var/log/nat_instance_setup.log
+    tail -f /var/log/setup.log
     ```
     
     **Please wait for at least 15 minutes for Terraform to apply scripts and 30 minutes more for Docker containers to build and run.**
@@ -171,7 +161,7 @@ This script automates the process of modifying a Terraform configuration file, c
 9. **Destroy Infrastructure**
 
     ```
-    terraform destroy --auto-approve
+    terraform destroy
     ```
     Run this command if you want to destroy the created infrastructure on your AWS account.
 
